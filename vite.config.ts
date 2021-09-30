@@ -7,6 +7,7 @@ const rootDir = resolve(__dirname)
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '',
   resolve: {
     alias: {
       '~': resolve(rootDir, 'src')
