@@ -5,15 +5,57 @@ import type { Calc, Action, Operator } from '~/types/Calc.type'
 
 const initialState: Action[] = []
 
-export const useCalc = create<Calc>((set, get) => {
-  const getTemporaryResult = () =>
-    get()
-      .actions.map(({ operator, value = 0 }) => {
-        if (operator === '-') return value * -1
+const calcMultiplyDivide = produce((actions: Action[]) => {
+  // indexes of multiply and divide operator
+  const multiplyDivideIndexes = actions
+    .map((action, i) => {
+      if (action.operator === '*' || action.operator === '/') return i
+    })
+    .filter(Boolean) as number[]
 
-        return value
-      })
-      .reduce((prevValue, currentValue) => prevValue + currentValue)
+  // since we'll mutate the length of the actions array (remove * & /),
+  // we must reverse the array (mutate from last index first),
+  // so the actions array's index won't change
+  multiplyDivideIndexes.reverse().forEach((index) => {
+    const target = actions[index - 1]
+    const factor = actions[index]
+
+    if (!factor.value) return
+
+    switch (factor.operator) {
+      case '*':
+        target.value = target.value! * factor.value
+        break
+      case '/':
+        target.value = target.value! / factor.value
+
+      default:
+        break
+    }
+
+    // remove the array
+    actions.splice(index, 1)
+  })
+
+  return actions
+})
+
+const calcPlusSubtract = (actions: Action[]): number =>
+  actions
+    .map(({ operator, value = 0 }) => {
+      if (operator === '-') return value * -1
+
+      return value
+    })
+    .reduce((prevValue, currentValue) => prevValue + currentValue)
+
+export const useCalc = create<Calc>((set, get) => {
+  const getTemporaryResult = () => {
+    const actions = get().actions
+    const actionsAfterMultiplyDivide = calcMultiplyDivide(actions)
+
+    return calcPlusSubtract(actionsAfterMultiplyDivide)
+  }
 
   const type = (value: number) =>
     set(

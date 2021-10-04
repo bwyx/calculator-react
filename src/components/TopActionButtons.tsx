@@ -10,8 +10,8 @@ const TopActionButtons = (props: Props) => {
   return (
     <div className="flex">
       <Button onClick={reset} label="C" className="w-1/3" />
-      <Button onClick={() => console.log('/')} label="/" className="w-1/3" />
-      <Button onClick={() => console.log('*')} label="*" className="w-1/3" />
+      <Button onClick={() => addOperator('/')} label="/" className="w-1/3" />
+      <Button onClick={() => addOperator('*')} label="*" className="w-1/3" />
       <Button onClick={() => addOperator('-')} label="-" className="w-1/3" />
     </div>
   )
